@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Tunfcb palette */
+  --color-navy-950: #070d24;
+  --color-navy-900: #0a1230;
+  --color-navy-800: #0e1a3b;
+  --color-navy-700: #16244f;
+  --color-blau: #004d98;
+  --color-blau-light: #1e4cab;
+  --color-grana: #a50044;
+  --color-gold: #edbb00;
+  --color-gold-light: #ffcb05;
+  --color-tunisia: #e70013;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+  }
+}
+
+/* Thin scrollbars for tables and the sidebar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(203 213 225) transparent;
+}
