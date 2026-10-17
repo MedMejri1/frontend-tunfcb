@@ -402,6 +402,8 @@ export interface Cafe {
   screens: number | null
   amenities: CafeAmenity[]
   description: string
+  /** Front of the café (/api/cafes/photos/…): pass it through assetUrl. */
+  photoUrl: string | null
   managerName: string
   phone: string
   showPhone: boolean

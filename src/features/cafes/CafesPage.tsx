@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Check, MapPin, Pencil, Phone, Plus, Search, Trash2, Undo2, X } from 'lucide-react'
+import { Check, ImageOff, ImagePlus, Loader2, MapPin, Pencil, Phone, Plus, Search, Trash2, Undo2, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -10,7 +10,7 @@ import { Field, Input, Select, Switch, Textarea } from '@/components/ui/form'
 import { Pagination, Table, TableState, Td, Th, Tr } from '@/components/ui/table'
 import { Tabs } from '@/components/ui/tabs'
 import { ConfirmDialog, PageHeader } from '@/components/common'
-import { api, apiErrorMessage } from '@/lib/api'
+import { api, apiErrorMessage, assetUrl } from '@/lib/api'
 import { useDebounced, useUrlFilters } from '@/lib/hooks'
 import { CAFE_AMENITIES, CAFE_STATUS } from '@/lib/labels'
 import type { Cafe, CafeAmenity, CafeStatus, Paginated } from '@/lib/types'
@@ -23,6 +23,27 @@ const REJECT_REASONS = ['Numéro injoignable', 'Café introuvable à cette adres
 
 /** 22123456 → 22 123 456 */
 const formatPhone = (phone: string) => phone.replace(/^(\d{2})(\d{3})(\d{3})$/, '$1 $2 $3')
+
+// Same size as the photos sent by the app: plenty for a phone, well under the 1.5 MB limit.
+const PHOTO_MAX_SIDE = 1280
+
+/** Picked file → JPEG data URL, long side 1280 px at most. */
+async function resizePhoto(file: File): Promise<string> {
+  const url = URL.createObjectURL(file)
+  try {
+    const img = new Image()
+    img.src = url
+    await img.decode()
+    const scale = Math.min(1, PHOTO_MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight))
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.round(img.naturalWidth * scale)
+    canvas.height = Math.round(img.naturalHeight * scale)
+    canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
+    return canvas.toDataURL('image/jpeg', 0.8)
+  } finally {
+    URL.revokeObjectURL(url)
+  }
+}
 
 export function CafesPage() {
   const qc = useQueryClient()
@@ -141,14 +162,36 @@ export function CafesPage() {
             ) : (
               cafes.data.items.map((c) => (
                 <Tr key={c.id}>
-                  <Td className="max-w-[20rem]">
-                    <p className="truncate font-semibold text-navy-900">{c.name}</p>
-                    <p className="truncate text-xs text-slate-500">{c.address}</p>
-                    <p className="truncate text-xs text-slate-400">
-                      {[c.screens ? `${c.screens} écran${c.screens > 1 ? 's' : ''}` : null, ...c.amenities.map((a) => CAFE_AMENITIES[a])]
-                        .filter(Boolean)
-                        .join(' · ')}
-                    </p>
+                  <Td className="max-w-[24rem]">
+                    <div className="flex items-center gap-3">
+                      {c.photoUrl ? (
+                        <a
+                          href={assetUrl(c.photoUrl)}
+                          target="_blank"
+                          rel="noreferrer"
+                          title="Voir la photo de la façade"
+                          className="h-12 w-16 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-50"
+                        >
+                          <img src={assetUrl(c.photoUrl)} alt="" className="h-full w-full object-cover" />
+                        </a>
+                      ) : (
+                        <div
+                          title="Pas de photo"
+                          className="flex h-12 w-16 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50"
+                        >
+                          <ImageOff className="h-5 w-5 text-slate-300" />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-navy-900">{c.name}</p>
+                        <p className="truncate text-xs text-slate-500">{c.address}</p>
+                        <p className="truncate text-xs text-slate-400">
+                          {[c.screens ? `${c.screens} écran${c.screens > 1 ? 's' : ''}` : null, ...c.amenities.map((a) => CAFE_AMENITIES[a])]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </p>
+                      </div>
+                    </div>
                   </Td>
                   <Td>
                     <p className="font-medium text-slate-800">{c.delegationName}</p>
@@ -316,9 +359,36 @@ function CafeDialog({ cafe, onClose }: { cafe: Cafe | null; onClose: () => void 
   })
   const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => setForm((f) => ({ ...f, [key]: value }))
   const delegations = locations.data?.find((g) => g.value === form.governorate)?.delegations ?? []
+  // Shown in the dialog: the current photo, or the new one as a data URL.
+  const [photoPreview, setPhotoPreview] = useState(cafe?.photoUrl ? assetUrl(cafe.photoUrl) : null)
+  // undefined: unchanged · null: removed · data URL: new photo.
+  const [newPhoto, setNewPhoto] = useState<string | null | undefined>(undefined)
+  const [resizing, setResizing] = useState(false)
+  const fileInput = useRef<HTMLInputElement>(null)
+
+  const pickPhoto = async (file: File | undefined) => {
+    if (fileInput.current) fileInput.current.value = ''
+    if (!file) return
+    setResizing(true)
+    try {
+      const dataUrl = await resizePhoto(file)
+      setPhotoPreview(dataUrl)
+      setNewPhoto(dataUrl)
+    } catch {
+      toast.error('Image illisible : choisis un fichier JPG, PNG ou WebP')
+    } finally {
+      setResizing(false)
+    }
+  }
+
+  const removePhoto = () => {
+    setPhotoPreview(null)
+    setNewPhoto(null)
+  }
 
   const save = useMutation({
     mutationFn: async () => {
+      const photo = newPhoto ? newPhoto.slice(newPhoto.indexOf(',') + 1) : newPhoto
       const body = {
         ...form,
         name: form.name.trim(),
@@ -327,6 +397,8 @@ function CafeDialog({ cafe, onClose }: { cafe: Cafe | null; onClose: () => void 
         description: form.description.trim(),
         managerName: form.managerName.trim(),
         screens: form.screens ? Number(form.screens) : null,
+        // Left out when unchanged, so the photo isn't sent again on every edit.
+        ...(photo !== undefined ? { photo } : {}),
       }
       if (cafe) await api.patch(`/admin/cafes/${cafe.id}`, body)
       else await api.post('/admin/cafes', body)
@@ -359,13 +431,55 @@ function CafeDialog({ cafe, onClose }: { cafe: Cafe | null; onClose: () => void 
           <Button variant="outline" onClick={onClose}>
             Annuler
           </Button>
-          <Button variant="primary" disabled={!valid} loading={save.isPending} onClick={() => save.mutate()}>
+          <Button variant="primary" disabled={!valid || resizing} loading={save.isPending} onClick={() => save.mutate()}>
             Enregistrer
           </Button>
         </>
       }
     >
       <div className="space-y-4">
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Photo de la façade</p>
+          <div className="flex items-start gap-4">
+            {photoPreview ? (
+              <div className="group relative aspect-[4/3] w-48 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                <img src={photoPreview} alt="Façade du café" className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  title="Retirer la photo"
+                  onClick={removePhoto}
+                  className="absolute right-1.5 top-1.5 cursor-pointer rounded bg-white/90 p-1 text-tunisia opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInput.current?.click()}
+                className="flex aspect-[4/3] w-48 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-slate-300 text-slate-400 transition-colors hover:border-blau hover:text-blau"
+              >
+                {resizing ? <Loader2 className="h-6 w-6 animate-spin" /> : <ImagePlus className="h-6 w-6" />}
+                <span className="text-xs font-semibold">{resizing ? 'Préparation…' : 'Ajouter'}</span>
+              </button>
+            )}
+            <div className="space-y-2 text-xs text-slate-500">
+              <p>Une seule photo, affichée en haut de la fiche du café dans l’app.</p>
+              {photoPreview && (
+                <Button variant="outline" size="sm" disabled={resizing} onClick={() => fileInput.current?.click()}>
+                  <ImagePlus className="h-4 w-4" /> Remplacer
+                </Button>
+              )}
+            </div>
+          </div>
+          <input
+            ref={fileInput}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            hidden
+            onChange={(e) => void pickPhoto(e.target.files?.[0])}
+          />
+        </div>
         <Field label="Nom du café">
           <Input value={form.name} maxLength={80} onChange={(e) => set('name', e.target.value)} />
         </Field>
