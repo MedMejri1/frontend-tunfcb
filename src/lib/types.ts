@@ -108,7 +108,19 @@ export interface Overview {
   users: { total: number; banned: number; newToday: number; new7d: number; new30d: number; activeToday: number; active7d: number }
   points: { circulating: number; distributedToday: number; distributed7d: number; distributed30d: number }
   games: { quizToday: number; wheelToday: number; adsToday: number; predictionsToday: number; openMatches: number }
-  timeseries: Array<{ day: string; signups: number; points: number; players: number }>
+  /** Work waiting for the team. */
+  todo: { cafesPending: number; ordersPending: number; supportOpen: number; wallReported: number }
+  wall: { postsToday: number; posts7d: number; comments7d: number; reactions7d: number; posters7d: number; hidden: number }
+  cafes: { approved: number; byGovernorate: Array<{ name: string; count: number }> }
+  shop: { open: boolean; monthOrders: number; deliveredRevenue: number }
+  audience: {
+    pushMembers: number
+    guests: number
+    guestsActive7d: number
+    lastReminder: { kind: string; sent: number; at: string } | null
+    injured: number
+  }
+  timeseries: Array<{ day: string; signups: number; points: number; players: number; posts: number }>
   pointsByType: TypeTotal[]
   topWeek: LeaderboardEntry[]
   recentUsers: Array<{ id: string; name: string; username: string; country: string; createdAt: string }>
