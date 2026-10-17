@@ -1,18 +1,18 @@
 import { useState } from 'react'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Megaphone, Send, Trash2, User, X } from 'lucide-react'
+import { Megaphone, Send, Smartphone, Trash2, User, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Field, Input, Select, Textarea } from '@/components/ui/form'
+import { Field, Input, Select, Switch, Textarea } from '@/components/ui/form'
 import { Tabs } from '@/components/ui/tabs'
 import { Pagination, Table, TableState, Td, Th, Tr } from '@/components/ui/table'
 import { ConfirmDialog, PageHeader, UserAvatar } from '@/components/common'
 import { api, apiErrorMessage } from '@/lib/api'
 import { useDebounced } from '@/lib/hooks'
 import { NOTIFICATION_CATEGORIES } from '@/lib/labels'
-import type { AdminNotification, AppUser, NotificationCategory, Paginated } from '@/lib/types'
+import type { AdminNotification, AppUser, NotificationCategory, Paginated, PushStatus } from '@/lib/types'
 import { formatDateTime } from '@/lib/utils'
 
 type Audience = 'all' | 'broadcast' | 'personal'
@@ -41,7 +41,7 @@ export function NotificationsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Notifications" description="Messages affichés dans l'onglet notifications de l'application." />
+      <PageHeader title="Notifications" description="Messages affichés dans l'onglet notifications de l'application, et en notification push sur les téléphones." />
 
       <div className="grid gap-6 xl:grid-cols-5">
         <Compose className="xl:col-span-2" />
@@ -139,8 +139,14 @@ function Compose({ className }: { className?: string }) {
   const [category, setCategory] = useState<NotificationCategory>('news')
   const [target, setTarget] = useState<AppUser | null>(null)
   const [mode, setMode] = useState<'all' | 'user'>('all')
+  const [push, setPush] = useState(true)
   const [search, setSearch] = useState('')
   const debounced = useDebounced(search)
+
+  const pushStatus = useQuery({
+    queryKey: ['push-status'],
+    queryFn: async () => (await api.get<PushStatus>('/admin/push/status')).data,
+  })
 
   const users = useQuery({
     queryKey: ['users', 'picker', debounced],
@@ -149,15 +155,20 @@ function Compose({ className }: { className?: string }) {
   })
 
   const send = useMutation({
-    mutationFn: () =>
-      api.post('/admin/notifications', {
-        title: title.trim(),
-        message: message.trim(),
-        category,
-        userId: mode === 'user' ? target?.id : undefined,
-      }),
-    onSuccess: () => {
-      toast.success(mode === 'all' ? 'Notification envoyée à tous les supporters' : `Notification envoyée à ${target?.name}`)
+    mutationFn: async () =>
+      (
+        await api.post<{ id: string; pushed: number }>('/admin/notifications', {
+          title: title.trim(),
+          message: message.trim(),
+          category,
+          userId: mode === 'user' ? target?.id : undefined,
+          push,
+        })
+      ).data,
+    onSuccess: ({ pushed }) => {
+      toast.success(mode === 'all' ? 'Notification envoyée à tous les supporters' : `Notification envoyée à ${target?.name}`, {
+        description: push ? `Notification push reçue sur ${pushed} téléphone${pushed > 1 ? 's' : ''}` : undefined,
+      })
       setTitle('')
       setMessage('')
       setTarget(null)
@@ -230,6 +241,15 @@ function Compose({ className }: { className?: string }) {
         <Field label="Message" hint={`${message.length}/1000`}>
           <Textarea rows={4} maxLength={1000} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Fais ton pronostic avant le coup d'envoi et gagne jusqu'à 200 BP." />
         </Field>
+        <div className="space-y-1">
+          <Switch checked={push} onChange={setPush} label="Envoyer aussi en notification push" />
+          <p className="flex items-center gap-1.5 text-xs text-slate-500">
+            <Smartphone className="h-3.5 w-3.5" />
+            {pushStatus.data
+              ? `${pushStatus.data.devices} téléphone${pushStatus.data.devices > 1 ? 's' : ''} inscrit${pushStatus.data.devices > 1 ? 's' : ''} aux notifications push`
+              : 'Chargement des téléphones inscrits…'}
+          </p>
+        </div>
         <Button variant="primary" className="w-full" disabled={!valid} loading={send.isPending} onClick={() => send.mutate()}>
           <Send className="h-4 w-4" /> Envoyer
         </Button>

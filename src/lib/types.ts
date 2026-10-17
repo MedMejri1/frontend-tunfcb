@@ -227,6 +227,23 @@ export interface Settings {
   predictions: { exactScorePoints: number; correctOutcomePoints: number; closeMinutesBeforeKickoff: number }
   referral: { referrerPoints: number; refereePoints: number }
   shop: ShopSettings
+  push: PushSettings
+}
+
+/** Automatic push notifications; times are HH:MM (Tunis). */
+export interface PushSettings {
+  matchReminder: { enabled: boolean; minutesBefore: number }
+  matchEnd: { enabled: boolean }
+  morning: { enabled: boolean; time: string }
+  evening: { enabled: boolean; time: string }
+}
+
+export interface PushStatus {
+  devices: number
+  matchesOptIn: number
+  gamesOptIn: number
+  recentDaily: Array<{ key: string; sent: number; at: string }>
+  recentMatches: Array<{ espnEventId: string; reminderSentAt?: string; endSentAt?: string }>
 }
 
 // ------------------------------------------------------------ Shop (amounts in millimes)

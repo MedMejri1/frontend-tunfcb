@@ -273,6 +273,63 @@ export function SettingsPage() {
         </Card>
 
         <Card>
+          <CardHeader
+            title="Notifications push automatiques"
+            description="Envoyées sur les téléphones des supporters (heure de Tunis). Chaque supporter peut couper les alertes match ou les rappels de jeux dans ses réglages."
+          />
+          <CardContent className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            <div className="space-y-3">
+              <Switch
+                label="Avant le match"
+                checked={form.push.matchReminder.enabled}
+                disabled={readOnly}
+                onChange={(enabled) => update('push', { ...form.push, matchReminder: { ...form.push.matchReminder, enabled } })}
+              />
+              <Field label="Minutes avant le coup d'envoi">
+                <Input
+                  type="number"
+                  min={1}
+                  max={120}
+                  value={form.push.matchReminder.minutesBefore}
+                  onChange={(e) => update('push', { ...form.push, matchReminder: { ...form.push.matchReminder, minutesBefore: num(e.target.value) } })}
+                />
+              </Field>
+            </div>
+            <div className="space-y-3">
+              <Switch
+                label="Fin du match"
+                checked={form.push.matchEnd.enabled}
+                disabled={readOnly}
+                onChange={(enabled) => update('push', { ...form.push, matchEnd: { enabled } })}
+              />
+              <p className="text-xs text-slate-500">Score final et rappel des points de pronostic, dès que le match est terminé.</p>
+            </div>
+            <div className="space-y-3">
+              <Switch
+                label="Rappel du matin"
+                checked={form.push.morning.enabled}
+                disabled={readOnly}
+                onChange={(enabled) => update('push', { ...form.push, morning: { ...form.push.morning, enabled } })}
+              />
+              <Field label="Heure" hint="Bonus, quiz, roue, pubs (+ pronostic les jours de match)">
+                <Input type="time" value={form.push.morning.time} onChange={(e) => update('push', { ...form.push, morning: { ...form.push.morning, time: e.target.value } })} />
+              </Field>
+            </div>
+            <div className="space-y-3">
+              <Switch
+                label="Rappel du soir"
+                checked={form.push.evening.enabled}
+                disabled={readOnly}
+                onChange={(enabled) => update('push', { ...form.push, evening: { ...form.push.evening, enabled } })}
+              />
+              <Field label="Heure" hint="Seulement à ceux à qui il reste des jeux du jour">
+                <Input type="time" value={form.push.evening.time} onChange={(e) => update('push', { ...form.push, evening: { ...form.push.evening, time: e.target.value } })} />
+              </Field>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
           <CardHeader title="Niveaux" description="XP total requis pour atteindre chaque niveau (seuils croissants, le premier à 0)" />
           <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {form.levels.map((lvl, i) => (
