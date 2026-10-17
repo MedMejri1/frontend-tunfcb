@@ -1,4 +1,6 @@
 import type {
+  CafeAmenity,
+  CafeStatus,
   MatchStatus,
   MissionEvent,
   NotificationCategory,
@@ -51,6 +53,7 @@ export const NOTIFICATION_CATEGORIES: Record<NotificationCategory, { label: stri
   referral: { label: 'Parrainage', tone: 'green' },
   order: { label: 'Commande', tone: 'violet' },
   support: { label: 'Support', tone: 'blue' },
+  wall: { label: 'Mur des fans', tone: 'grana' },
 }
 
 export const SUPPORT_CATEGORIES: Record<SupportCategory, string> = {
@@ -102,4 +105,20 @@ export const COUNTRIES: Record<string, string> = {
   DE: 'Allemagne',
   BE: 'Belgique',
   CA: 'Canada',
+}
+
+export const CAFE_STATUS: Record<CafeStatus, { label: string; tone: Tone }> = {
+  pending: { label: 'À vérifier', tone: 'gold' },
+  approved: { label: 'Publié', tone: 'green' },
+  rejected: { label: 'Refusé', tone: 'slate' },
+}
+
+export const CAFE_AMENITIES: Record<CafeAmenity, string> = {
+  big_screen: 'Écran géant',
+  terrace: 'Terrasse',
+  air_conditioning: 'Climatisation',
+  wifi: 'Wi-Fi',
+  family: 'Espace familles',
+  parking: 'Parking',
+  booking: 'Réservation',
 }

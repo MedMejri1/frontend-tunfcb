@@ -3,6 +3,7 @@ import { NavLink, Outlet } from 'react-router-dom'
 import {
   Bell,
   CircleHelp,
+  Coffee,
   Coins,
   Flag,
   HeartPulse,
@@ -10,6 +11,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  MessagesSquare,
   Package,
   Settings2,
   ShoppingBag,
@@ -23,8 +25,10 @@ import {
 import { Logo } from '@/components/common/Logo'
 import { UserAvatar } from '@/components/common'
 import { useAuth } from '@/lib/auth'
+import { useCafesSummary } from '@/features/cafes/api'
 import { useShopSummary } from '@/features/shop/api'
 import { useSupportSummary } from '@/features/support/api'
+import { useWallSummary } from '@/features/wall/api'
 import { cn } from '@/lib/utils'
 
 interface NavItem {
@@ -33,7 +37,7 @@ interface NavItem {
   icon: LucideIcon
   superAdmin?: boolean
   /** Counter shown next to the label (work waiting for the team). */
-  badge?: 'orders' | 'support'
+  badge?: 'orders' | 'support' | 'cafes' | 'wall'
 }
 
 const SECTIONS: Array<{ title: string; items: NavItem[] }> = [
@@ -70,7 +74,9 @@ const SECTIONS: Array<{ title: string; items: NavItem[] }> = [
     title: 'Communication',
     items: [
       { to: '/support', label: 'Messages', icon: Inbox, badge: 'support' },
+      { to: '/wall', label: 'Mur des fans', icon: MessagesSquare, badge: 'wall' },
       { to: '/notifications', label: 'Notifications', icon: Bell },
+      { to: '/cafes', label: 'Cafés', icon: Coffee, badge: 'cafes' },
     ],
   },
   {
@@ -84,6 +90,8 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const badges = {
     orders: useShopSummary().data?.ordersByStatus.pending ?? 0,
     support: useSupportSummary().data?.awaiting ?? 0,
+    cafes: useCafesSummary().data?.pending ?? 0,
+    wall: useWallSummary().data?.reported ?? 0,
   }
   return (
     <nav className="flex h-full flex-col bg-navy-900 text-white">

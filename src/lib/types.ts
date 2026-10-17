@@ -192,7 +192,7 @@ export interface MatchPrediction {
   user: { id: string; name: string; username: string } | null
 }
 
-export type NotificationCategory = 'match' | 'reward' | 'quiz' | 'news' | 'system' | 'referral' | 'order' | 'support'
+export type NotificationCategory = 'match' | 'reward' | 'quiz' | 'news' | 'system' | 'referral' | 'order' | 'support' | 'wall'
 
 export interface AdminNotification {
   id: string
@@ -371,4 +371,38 @@ export interface RosterPlayer {
   name: string
   number: number | null
   position: string
+}
+
+// ------------------------------------------------------------ Cafés (where to watch the match)
+
+export type CafeStatus = 'pending' | 'approved' | 'rejected'
+export type CafeAmenity = 'big_screen' | 'terrace' | 'air_conditioning' | 'wifi' | 'family' | 'parking' | 'booking'
+
+export interface Cafe {
+  id: string
+  name: string
+  governorate: string
+  governorateName: string
+  delegation: string
+  delegationName: string
+  address: string
+  mapsUrl: string
+  screens: number | null
+  amenities: CafeAmenity[]
+  description: string
+  managerName: string
+  phone: string
+  showPhone: boolean
+  status: CafeStatus
+  rejectionReason: string
+  createdAt: string
+  reviewedAt: string | null
+  /** Supporter who sent it from the app (null: guest mode or added by the team). */
+  submittedBy: { id: string; name: string; email: string } | null
+}
+
+export interface TnGovernorate {
+  value: string
+  name: string
+  delegations: Array<{ value: string; name: string }>
 }

@@ -26,6 +26,8 @@ const OrderDetailPage = page(() => import('@/features/shop/OrderDetailPage'), 'O
 const InjuriesPage = page(() => import('@/features/team/InjuriesPage'), 'InjuriesPage')
 const SupportPage = page(() => import('@/features/support/SupportPage'), 'SupportPage')
 const SupportDetailPage = page(() => import('@/features/support/SupportDetailPage'), 'SupportDetailPage')
+const CafesPage = page(() => import('@/features/cafes/CafesPage'), 'CafesPage')
+const WallPage = page(() => import('@/features/wall/WallPage'), 'WallPage')
 
 const Spinner = ({ dark }: { dark?: boolean }) => (
   <div className={dark ? 'flex h-screen items-center justify-center bg-navy-900' : 'flex h-96 items-center justify-center'}>
@@ -73,6 +75,8 @@ export default function App() {
         <Route path="team/injuries" element={withSuspense(<InjuriesPage />)} />
         <Route path="support" element={withSuspense(<SupportPage />)} />
         <Route path="support/:id" element={withSuspense(<SupportDetailPage />)} />
+        <Route path="cafes" element={withSuspense(<CafesPage />)} />
+        <Route path="wall" element={withSuspense(<WallPage />)} />
         <Route
           path="admins"
           element={
