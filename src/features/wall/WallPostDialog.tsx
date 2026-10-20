@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog } from '@/components/ui/dialog'
 import { ConfirmDialog, UserAvatar } from '@/components/common'
 import { assetUrl } from '@/lib/api'
-import { formatDateTime, timeAgo } from '@/lib/utils'
+import { formatDateTime, timeAgo, contactLine } from '@/lib/utils'
 import {
   useBlockFromWall,
   useDeleteWallComment,
@@ -32,7 +32,7 @@ function AuthorLine({ author }: { author: WallAuthor | null }) {
         <Link to={`/users/${author.id}`} className="block truncate text-sm font-bold text-navy-900 hover:text-blau">
           {author.name}
         </Link>
-        <p className="truncate text-xs text-slate-400">{author.email}</p>
+        <p className="truncate text-xs text-slate-400">{contactLine(author)}</p>
       </div>
       {author.wallBlocked && <Badge tone="red">Bloqué du mur</Badge>}
       {author.banned && <Badge tone="red">Compte suspendu</Badge>}

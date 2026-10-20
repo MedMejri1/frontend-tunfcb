@@ -12,7 +12,7 @@ import { Logo } from '@/components/common/Logo'
 import { api, apiErrorMessage } from '@/lib/api'
 import { ORDER_STATUS, SUPPORT_CATEGORIES, SUPPORT_STATUS } from '@/lib/labels'
 import type { SupportTicketDetail } from '@/lib/types'
-import { cn, formatDate, formatDateTime, formatDt } from '@/lib/utils'
+import { cn, formatDate, formatDateTime, formatDt, contactLine } from '@/lib/utils'
 
 export function SupportDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -153,7 +153,7 @@ export function SupportDetailPage() {
                       <p className="truncate text-xs text-slate-500">@{ticket.user.username}</p>
                     </div>
                   </div>
-                  <p className="text-slate-600">{ticket.user.email}</p>
+                  <p className="text-slate-600">{contactLine(ticket.user)}</p>
                   <p className="text-xs text-slate-400">
                     Membre depuis le {formatDate(ticket.user.memberSince)} · {ticket.user.ticketsCount} demande(s)
                   </p>

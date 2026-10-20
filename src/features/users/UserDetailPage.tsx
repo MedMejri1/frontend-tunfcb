@@ -26,7 +26,7 @@ import { apiErrorMessage } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { COUNTRIES, TRANSACTION_TYPES } from '@/lib/labels'
 import type { AppUser } from '@/lib/types'
-import { cn, formatDate, formatDateTime, formatNumber, formatPoints, timeAgo } from '@/lib/utils'
+import { cn, formatDate, formatDateTime, formatNumber, formatPoints, timeAgo, contactLine } from '@/lib/utils'
 import {
   useAdjustPoints,
   useDeleteUser,
@@ -84,7 +84,7 @@ export function UserDetailPage() {
                 {user.isDemo && <Badge>Démo</Badge>}
               </div>
               <p className="text-sm text-slate-500">
-                @{user.username} · {user.email}
+                @{user.username} · {contactLine(user)}
               </p>
               <p className="mt-0.5 text-xs text-slate-500">
                 <CountryFlag code={user.country} />{[user.city, COUNTRIES[user.country] ?? user.country].filter(Boolean).join(', ')} · inscrit le{' '}

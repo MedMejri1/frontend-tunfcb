@@ -11,7 +11,7 @@ import { api } from '@/lib/api'
 import { useDebounced, useUrlFilters } from '@/lib/hooks'
 import { SUPPORT_CATEGORIES, SUPPORT_STATUS } from '@/lib/labels'
 import type { Paginated, SupportStatus, SupportTicketSummary } from '@/lib/types'
-import { cn, timeAgo } from '@/lib/utils'
+import { cn, timeAgo, contactLine } from '@/lib/utils'
 
 const TABS: Array<'all' | SupportStatus> = ['open', 'answered', 'closed', 'all']
 
@@ -56,7 +56,7 @@ export function SupportPage() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
               className="pl-9"
-              placeholder="N°, sujet, nom ou email du supporter…"
+              placeholder="N°, sujet, nom, téléphone ou email…"
               value={filters.search}
               onChange={(e) => setFilters({ search: e.target.value })}
             />
@@ -93,7 +93,7 @@ export function SupportPage() {
                   </Td>
                   <Td>
                     <p className="font-semibold text-slate-800">{t.user?.name ?? 'Compte supprimé'}</p>
-                    <p className="text-xs text-slate-400">{t.user?.email}</p>
+                    <p className="text-xs text-slate-400">{t.user ? contactLine(t.user) : ''}</p>
                   </Td>
                   <Td className="max-w-[24rem]">
                     <p className="truncate text-sm text-slate-600">

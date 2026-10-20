@@ -35,6 +35,14 @@ export function timeAgo(value?: string | Date | null): string {
   return formatDate(value)
 }
 
+/** +21622123456 → "+216 22 123 456"; numbers from abroad stay as they are. */
+export const formatPhone = (phone?: string | null) =>
+  phone ? phone.replace(/^\+216(\d{2})(\d{3})(\d{3})$/, '+216 $1 $2 $3') : ''
+
+/** How to reach a supporter: phone and / or email. */
+export const contactLine = (user: { phone?: string | null; email?: string | null }) =>
+  [formatPhone(user.phone), user.email].filter(Boolean).join(' · ') || '—'
+
 export const initials = (name: string) =>
   name
     .split(/\s+/)

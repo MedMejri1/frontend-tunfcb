@@ -21,7 +21,8 @@ export interface WallSummary {
 export interface WallAuthor {
   id: string
   name: string
-  email: string
+  email: string | null
+  phone: string | null
   username: string
   banned: boolean
   wallBlocked: boolean

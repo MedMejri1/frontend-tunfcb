@@ -35,7 +35,10 @@ export interface AppUser {
   lastName: string
   name: string
   username: string
-  email: string
+  /** International format (+21622123456); missing on the first accounts. */
+  phone: string | null
+  /** Optional since sign-up moved to the phone number. */
+  email: string | null
   city: string
   country: string
   status: 'active' | 'banned'
@@ -297,7 +300,7 @@ export interface OrderListItem {
   total: number
   itemsCount: number
   customer: { name: string; phone: string; governorate: string }
-  user: { id: string; name: string; email: string } | null
+  user: { id: string; name: string; email: string | null; phone: string | null } | null
 }
 
 export interface OrderTracking {
@@ -323,7 +326,7 @@ export interface OrderDetail {
   cancelReason?: string
   adminNote: string
   nextStatuses: OrderStatus[]
-  user: { id: string; name: string; email: string; username: string } | null
+  user: { id: string; name: string; email: string | null; phone: string | null; username: string } | null
 }
 
 export interface ShopSummary {
@@ -351,13 +354,13 @@ export interface SupportTicketSummary {
   lastMessage: { from: 'user' | 'admin'; body: string } | null
   messagesCount: number
   unread: boolean
-  user: { id: string; name: string; email: string } | null
+  user: { id: string; name: string; email: string | null; phone: string | null } | null
 }
 
 export interface SupportTicketDetail extends Omit<SupportTicketSummary, 'user'> {
   messages: Array<{ from: 'user' | 'admin'; body: string; at: string; adminName?: string }>
   order: { id: string; number: string; status: OrderStatus; total: number } | null
-  user: { id: string; name: string; email: string; username: string; memberSince: string; ticketsCount: number } | null
+  user: { id: string; name: string; email: string | null; phone: string | null; username: string; memberSince: string; ticketsCount: number } | null
 }
 
 // ------------------------------------------------------------ Team (infirmary)
@@ -412,7 +415,7 @@ export interface Cafe {
   createdAt: string
   reviewedAt: string | null
   /** Supporter who sent it from the app (null: guest mode or added by the team). */
-  submittedBy: { id: string; name: string; email: string } | null
+  submittedBy: { id: string; name: string; email: string | null; phone: string | null } | null
 }
 
 export interface TnGovernorate {

@@ -8,7 +8,7 @@ import { Pagination, Table, TableState, Td, Th, Tr } from '@/components/ui/table
 import { CountryFlag, PageHeader, UserAvatar } from '@/components/common'
 import { COUNTRIES } from '@/lib/labels'
 import { useUrlFilters } from '@/lib/hooks'
-import { formatNumber, timeAgo } from '@/lib/utils'
+import { formatNumber, timeAgo, contactLine } from '@/lib/utils'
 import { useUsers } from './api'
 
 export function UsersPage() {
@@ -47,7 +47,7 @@ export function UsersPage() {
             <Input
               value={search}
               onChange={(e) => onSearch(e.target.value)}
-              placeholder="Nom, @pseudo, email ou code de parrainage…"
+              placeholder="Nom, @pseudo, téléphone, email ou code…"
               className="pl-9"
             />
           </div>
@@ -103,7 +103,7 @@ export function UsersPage() {
                           {u.name}
                           {u.isDemo && <span className="ml-2 text-[10px] font-bold uppercase text-slate-400">démo</span>}
                         </p>
-                        <p className="truncate text-xs text-slate-500">@{u.username} · {u.email}</p>
+                        <p className="truncate text-xs text-slate-500">@{u.username} · {contactLine(u)}</p>
                       </div>
                     </div>
                   </Td>

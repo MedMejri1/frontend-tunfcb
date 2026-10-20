@@ -11,7 +11,7 @@ import { Field, Input, Textarea } from '@/components/ui/form'
 import { api, apiErrorMessage, assetUrl } from '@/lib/api'
 import { ORDER_STATUS } from '@/lib/labels'
 import type { OrderDetail, OrderStatus, OrderTracking } from '@/lib/types'
-import { cn, formatDateTime, formatDt } from '@/lib/utils'
+import { cn, formatDateTime, formatDt, contactLine } from '@/lib/utils'
 
 export function OrderDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -149,7 +149,7 @@ export function OrderDetailPage() {
                   <Link to={`/users/${order.user.id}`} className="font-semibold text-blau">
                     {order.user.name}
                   </Link>{' '}
-                  · {order.user.email}
+                  · {contactLine(order.user)}
                 </p>
               )}
             </CardContent>
